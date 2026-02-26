@@ -22023,6 +22023,53 @@ var FIREBASE_CONFIG = {
   	messagingSenderId: "984921802923",
   	appId: "1:984921802923:web:9b27fc9aaf20247dedcfee"
 };
+
+var FB_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY" && FIREBASE_CONFIG.apiKey !== "";
+var db = null;
+var FS_COLLECTION = "fs-documents";
+if(FB_CONFIGURED){
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+  }catch(e){ console.warn("Firebase init failed:", e.message); FB_CONFIGURED=false; }
+}
+
+function compressImage(dataUrl, maxW, q){
+  return new Promise(function(resolve){
+    var img = new window.Image();
+    img.onload = function(){
+      var w=img.naturalWidth, hh=img.naturalHeight;
+      var scale=Math.min(1,maxW/w);
+      var cw=Math.max(1,Math.round(w*scale)), ch=Math.max(1,Math.round(hh*scale));
+      var canvas=document.createElement("canvas");
+      canvas.width=cw; canvas.height=ch;
+      canvas.getContext("2d").drawImage(img,0,0,cw,ch);
+      resolve({dataUrl:canvas.toDataURL("image/jpeg",q||0.75), width:cw, height:ch});
+    };
+    img.src=dataUrl;
+  });
+}
+
+async function compressAllImages(d){
+  var out=JSON.parse(JSON.stringify(d));
+  async function compressAtts(arr){
+    for(var i=0;i<(arr||[]).length;i++){
+      if(arr[i].isImage&&arr[i].dataUrl){
+        var c=await compressImage(arr[i].dataUrl,1200,0.75);
+        arr[i].dataUrl=c.dataUrl; arr[i].imgWidth=c.width; arr[i].imgHeight=c.height;
+      }
+    }
+  }
+  await compressAtts(out.attachments);
+  await compressAtts(out.techSpecAttachments);
+  for(var k=0;k<(out.requirements||[]).length;k++){
+    if(out.requirements[k]&&out.requirements[k].attachments){
+      await compressAtts(out.requirements[k].attachments);
+    }
+  }
+  return out;
+}
+
 // ── Development Objects dataset ──────────────────────────────────────────
 var DEFAULT_DEV_OBJECTS = [
   "Material master",
