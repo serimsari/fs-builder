@@ -22079,7 +22079,9 @@ function Dashboard(props){
       ),
       h("div",{style:{display:"flex",gap:"10px",alignItems:"center"}},
         h("button",{className:"btn-new",style:{background:"#22c55e"},onClick:props.onImport},"\u2b06 Import Excel"),
-        h("button",{className:"btn-new",onClick:onNew},"+ New FS")    ),
+        h("button",{className:"btn-new",onClick:onNew},"+ New FS")
+      )
+    ),
     !FB_CONFIGURED?h("div",{className:"fb-banner"},
       "\u26a0\ufe0f  Firebase not configured \u2014 open this HTML file and fill in ",
       h("code",null,"FIREBASE_CONFIG"),
@@ -22100,10 +22102,6 @@ function Dashboard(props){
         h("select",{value:filter.ricefw||"",onChange:function(e){setFilter(Object.assign({},filter,{ricefw:e.target.value}));}},
           h("option",{value:""},"All RICEFW IDs"),
           DEFAULT_RICEFW_IDS.map(function(o){return h("option",{key:o,value:o},o);})
-        ),
-        h("select",{value:filter.devObj||"",onChange:function(e){setFilter(Object.assign({},filter,{devObj:e.target.value}));}},
-          h("option",{value:""},"All Dev. Objects"),
-          DEFAULT_DEV_OBJECTS.map(function(o){return h("option",{key:o,value:o},o);})
         ),
         h("select",{value:filter.status,onChange:function(e){setFilter(Object.assign({},filter,{status:e.target.value}));}},
           h("option",{value:""},"All Statuses"),
