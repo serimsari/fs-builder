@@ -130,6 +130,22 @@
   .sb-back:hover { color:#aaa; }
   .fb-banner { background:#fef9c3; border-bottom:1px solid #f0e68c; padding:8px 32px; font-size:11px; color:#854d0e; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .fb-banner code { background:#fff8db; padding:1px 5px; border-radius:3px; font-size:10px; }
+  /* ── Password Gate ───────────────────────────────────────── */
+  .pw-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);}
+  .pw-card{background:#fff;border-radius:16px;padding:48px 40px;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.4);text-align:center;}
+  .pw-logo{font-size:42px;margin-bottom:12px;}
+  .pw-card h1{font-size:22px;font-weight:700;color:#1a1a2e;margin-bottom:4px;}
+  .pw-card p{font-size:13px;color:#888;margin-bottom:28px;}
+  .pw-field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;text-align:left;}
+  .pw-field label{font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.5px;}
+  .pw-field input{padding:12px 14px;border:1.5px solid #dde;border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:.15s;}
+  .pw-field input:focus{border-color:#4f7cff;box-shadow:0 0 0 3px rgba(79,124,255,.1);}
+  .pw-field input.err{border-color:#e74c3c;background:#fff8f8;}
+  .btn-pw{width:100%;padding:13px;border:none;border-radius:8px;background:#4f7cff;color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:.15s;}
+  .btn-pw:hover{background:#3a6aee;}
+  .btn-pw:disabled{background:#aaa;cursor:not-allowed;}
+  .pw-err{margin-top:12px;padding:10px 14px;background:#fff0f0;border:1px solid #fcc;border-radius:6px;font-size:12px;color:#c0392b;}
+  .pw-note{margin-top:18px;font-size:11px;color:#bbb;}
 
 </style>
 </head>
@@ -139,6 +155,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 var docx = function(exports) {
   "use strict";var __defProp = Object.defineProperty;
@@ -22006,170 +22023,6 @@ var FIREBASE_CONFIG = {
   	messagingSenderId: "984921802923",
   	appId: "1:984921802923:web:9b27fc9aaf20247dedcfee"
 };
-
-var FB_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
-// ── Development Objects dataset ──────────────────────────────────────────
-// Edit this list to change the default options.
-// When Firebase is configured, the live list is loaded from Firestore
-// (config/dev-objects) and overrides this default — editable from inside the app.
-var DEFAULT_DEV_OBJECTS = [
-  "Material master",
-  "Pricing",
-  "Sales Order",
-  "Business Partner",
-  "Delivery",
-  "Material determination",
-  "Availability",
-  "Listing & Exclusion",
-  "Invoice",
-  "Backorder",
-  "Order Output",
-  "Delivery output",
-  "Billing output"
-];
-
-var DEFAULT_APPLICATIONS = [
-  "Net Order",
-  "EHealth",
-  "Kentico",
-  "MSD",
-  "Salesfoce",
-  "DPN",
-  "e-pakbon",
-  "Evidensia",
-  "Hills",
-  "MKG",
-  "Pyramid"
-];
-
-var DEFAULT_RICEFW_IDS = [
-  "Netorder - Material Master",
-  "NetOrder - Condition Records",
-  "NetOrder - Order Confirmation",
-  "NetOrder - BP/Customer Master",
-  "NetOrder - Delivery Confirmation",
-  "NetOrder - Material Determination",
-  "NetOrder - List of batches / expiry dates",
-  "Netorder - Listing & Exclusion",
-  "NetOrder - Classification",
-  "NetOrder - Sales Order Simulate",
-  "NetOrder - Inventory Information",
-  "NetOrder - Sales Order Creation",
-  "Ehealth - Order",
-  "Ehealth - Delivery",
-  "Kentico - Customer Master",
-  "Kentico - Material Master",
-  "Kentico - Price Conditions",
-  "Kentico - MSD Contract",
-  "Kentico - Stock Req (ATP Information)",
-  "Kentico - Lsiting & Exclusion",
-  "Kentico - Sales Order Creation",
-  "Kentico - Delivery",
-  "Kentico - Customer Address",
-  "MSD - INT-245",
-  "MSD - INT-254",
-  "MSD - INT-246",
-  "MSD - INT-162",
-  "SF - ZBPC_M_I003_Q1",
-  "SF - ZBPC_M_I004_Q1",
-  "SF - ZTAB_ART_VER",
-  "SF - ZTAB_CUST_VER",
-  "SF - ZTAB_VENDR_VER",
-  "SF - AUV_FACT_CLASS",
-  "SF - AUV_OPIUM-SF",
-  "SF - VER_KLCHT_DLIV",
-  "SF - VER_KLCHT_DLWM",
-  "SF - VER_KLCHT_ORD",
-  "DPN - DHL_Shipment",
-  "E-Pabkon - RTO_Shipment",
-  "E-Pabkon - IS_SAP_Pakbon_2_VetCIS",
-  "Evidensia - Invoices",
-  "Hills - EDI_Orders",
-  "MKG - RTO_Shipment",
-  "Pyramid - Invoice outbound",
-  "Sales Quotation/ Sales Order Approval Process",
-  "Back-Order Processing",
-  "DA-OTC-007",
-  "DA-OTC-008",
-  "DA-OTC-009",
-  "DA-OTC-002-A",
-  "DA-OTC-002-B",
-  "DA-OTC-006",
-  "DA-OTC-015-A",
-  "DA-OTC-015-B",
-  "DA-OTC-016-A",
-  "DA-OTC-016-B",
-  "DA-OTC-016-C",
-  "DA-OTC-017",
-  "DA-OTC-019",
-  "DA-OTC-020",
-  "DA-OTC-021",
-  "DA-BRF-OTC",
-  "DA-OTC-BE-x1",
-  "DA-OTC-BE-x2-A",
-  "DA-OTC-BE-x2-B",
-  "DA-OTC-BE-x3-A",
-  "DA-OTC-BE-x3-B",
-  "DA-OTC-BE-x3-C",
-  "DA-OTC-BE-x4-A",
-  "DA-OTC-BE-x4-B",
-  "DA-OTC-BE-x4-C",
-  "DA-OTC-BE-x5-A",
-  "DA-OTC-BE-x5-B",
-  "DA-OTC-BE-x5-C",
-  "DA-OTC-NL-04",
-  "DA-OTC-BE-x3",
-  "DA-OTC-NL-03",
-  "DA-OTC-NL-05",
-  "DA-OTC-NL-07"
-];
-
-var db = null;
-var FS_COLLECTION = "fs-documents";
-if(FB_CONFIGURED){
-  try{
-    firebase.initializeApp(FIREBASE_CONFIG);
-    db = firebase.firestore();
-  }catch(e){ console.warn("Firebase init failed:", e.message); FB_CONFIGURED=false; }
-}
-
-// Compress an image dataUrl to JPEG max maxW px wide, quality q
-function compressImage(dataUrl, maxW, q){
-  return new Promise(function(resolve){
-    var img = new window.Image();
-    img.onload = function(){
-      var w=img.naturalWidth, hh=img.naturalHeight;
-      var scale=Math.min(1,maxW/w);
-      var cw=Math.max(1,Math.round(w*scale)), ch=Math.max(1,Math.round(hh*scale));
-      var canvas=document.createElement("canvas");
-      canvas.width=cw; canvas.height=ch;
-      canvas.getContext("2d").drawImage(img,0,0,cw,ch);
-      resolve({dataUrl:canvas.toDataURL("image/jpeg",q||0.75), width:cw, height:ch});
-    };
-    img.src=dataUrl;
-  });
-}
-
-async function compressAllImages(d){
-  var out=JSON.parse(JSON.stringify(d));
-  async function compressAtts(arr){
-    for(var i=0;i<(arr||[]).length;i++){
-      if(arr[i].isImage&&arr[i].dataUrl){
-        var c=await compressImage(arr[i].dataUrl,1200,0.75);
-        arr[i].dataUrl=c.dataUrl; arr[i].imgWidth=c.width; arr[i].imgHeight=c.height;
-      }
-    }
-  }
-  await compressAtts(out.attachments);
-  await compressAtts(out.techSpecAttachments);
-  for(var k=0;k<(out.requirements||[]).length;k++){
-    if(out.requirements[k]&&out.requirements[k].attachments){
-      await compressAtts(out.requirements[k].attachments);
-    }
-  }
-  return out;
-}
-
 function statusBadge(s){
   var cls={Draft:"draft","In Review":"review",Approved:"approved",Final:"final"}[s]||"draft";
   return h("span",{className:"badge "+cls},s||"Draft");
@@ -22224,8 +22077,9 @@ function Dashboard(props){
         h("h1",null,"SAP FS Builder"),
         h("p",null,"Functional Specification Management \u2014 S/4HANA Team")
       ),
-      h("button",{className:"btn-new",onClick:onNew},"+ New FS")
-    ),
+      h("div",{style:{display:"flex",gap:"10px",alignItems:"center"}},
+        h("button",{className:"btn-new",style:{background:"#22c55e"},onClick:props.onImport},"\u2b06 Import Excel"),
+        h("button",{className:"btn-new",onClick:onNew},"+ New FS")    ),
     !FB_CONFIGURED?h("div",{className:"fb-banner"},
       "\u26a0\ufe0f  Firebase not configured \u2014 open this HTML file and fill in ",
       h("code",null,"FIREBASE_CONFIG"),
@@ -22283,6 +22137,71 @@ function Dashboard(props){
   );
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════
+//  SITE PASSWORD CONFIGURATION
+//  Change the password by replacing SITE_PASSWORD below.
+//  This is the only line you need to edit to change the password.
+// ═══════════════════════════════════════════════════════════════════════
+var SITE_PASSWORD = "CVET2026";   // <-- change this to your team password
+
+var SESSION_KEY = "fs_builder_auth";
+
+function checkSession(){
+  return sessionStorage.getItem(SESSION_KEY) === "ok";
+}
+function grantSession(){
+  sessionStorage.setItem(SESSION_KEY,"ok");
+}
+
+function PasswordGate(props){
+  var _pw=React.useState(""),pw=_pw[0],setPw=_pw[1];
+  var _err=React.useState(false),err=_err[0],setErr=_err[1];
+  var _busy=React.useState(false),busy=_busy[0],setBusy=_busy[1];
+
+  function submit(e){
+    if(e&&e.preventDefault)e.preventDefault();
+    setBusy(true);setErr(false);
+    // Small artificial delay so it doesn't feel instant (brute-force deterrent)
+    setTimeout(function(){
+      if(pw===SITE_PASSWORD){
+        grantSession();
+        props.onSuccess();
+      }else{
+        setErr(true);
+        setBusy(false);
+        setPw("");
+      }
+    },400);
+  }
+
+  return h("div",{className:"pw-screen"},
+    h("div",{className:"pw-card"},
+      h("div",{className:"pw-logo"},"\uD83D\uDCCB"),
+      h("h1",null,"SAP FS Builder"),
+      h("p",null,"Enter the team password to continue"),
+      h("form",{onSubmit:submit},
+        h("div",{className:"pw-field"},
+          h("label",null,"Password"),
+          h("input",{
+            type:"password",
+            value:pw,
+            onChange:function(e){setPw(e.target.value);setErr(false);},
+            className:err?"err":"",
+            placeholder:"Team password",
+            autoFocus:true,
+            disabled:busy
+          })
+        ),
+        h("button",{className:"btn-pw",type:"submit",disabled:busy||!pw},
+          busy?"Checking...":"Enter"
+        )
+      ),
+      err?h("div",{className:"pw-err"},"\u274C Incorrect password. Please try again."):null,
+      h("p",{className:"pw-note"},"Contact your team admin if you don\u2019t have the password")
+    )
+  );
+}
 
 var h=React.createElement,useState=React.useState,useRef=React.useRef,useEffect=React.useEffect;
 var CTYPES=[{id:"new_program",label:"New Program"},{id:"modify_program",label:"Modify Program"},{id:"form_output",label:"Form / Output"},{id:"enhancement",label:"Enhancement"},{id:"interface_api",label:"Interface / API"},{id:"config",label:"Configuration"}];
@@ -22733,6 +22652,7 @@ function DT(p){
 }
 
 function App(){
+  var _auth=React.useState(checkSession()),authed=_auth[0],setAuthed=_auth[1];
   var _scr=useState("dashboard"),screen=_scr[0],setScreen=_scr[1];
   var _fid=useState(null),fsDocId=_fid[0],setFsDocId=_fid[1];
   var _sav=useState(false),saving=_sav[0],setSaving=_sav[1];
@@ -22879,6 +22799,111 @@ function App(){
     }
     setSaving(false);
   }
+
+  function importFromExcel(){
+    var input=document.createElement("input");
+    input.type="file";
+    input.accept=".xlsx,.xls";
+    input.onchange=function(e){
+      var file=e.target.files[0];
+      if(!file)return;
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          // Use SheetJS (xlsx) loaded inline if available, otherwise inform user
+          if(typeof XLSX==="undefined"){
+            alert("SheetJS not loaded. Please ensure you have the latest version of the HTML file.");
+            return;
+          }
+          var wb=XLSX.read(ev.target.result,{type:"array",cellDates:true});
+          var ws=wb.Sheets[wb.SheetNames[0]];
+          var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+          if(rows.length<3){alert("No data rows found. Please fill in at least one row below the hint row.");return;}
+
+          // Row 0=headers, Row 1=hints, Row 2+ = data
+          var headers=rows[0].map(function(h){return (h||"").toString().replace(" *","").trim();});
+          var dataRows=rows.slice(2).filter(function(r){return r.some(function(c){return c!=="";});});
+          if(dataRows.length===0){alert("No data rows found.");return;}
+
+          function col(row,name){
+            var idx=headers.indexOf(name);
+            return idx>=0?(row[idx]||"").toString().trim():"";
+          }
+
+          var previews=dataRows.map(function(row,i){
+            var crId=col(row,"CR ID");
+            var title=col(row,"Title");
+            var author=col(row,"Author");
+            var status=col(row,"Status")||"Draft";
+            var module=col(row,"Module")||"SD";
+            var changeTypesRaw=col(row,"Change Types");
+            var changeTypes=changeTypesRaw?changeTypesRaw.split(",").map(function(s){return s.trim();}).filter(Boolean):["new_program"];
+            var requirementsRaw=col(row,"Requirements");
+            var requirements=requirementsRaw?requirementsRaw.split("||").map(function(s){return {text:s.trim(),attachments:[]};}):[{text:"",attachments:[]}];
+            var dateVal=col(row,"Date");
+            var authorDate=dateVal instanceof Date?dateVal.toISOString().split("T")[0]:dateVal||new Date().toISOString().split("T")[0];
+            return {
+              crId:crId,jiraId:col(row,"JIRA ID"),title:title,author:author,authorDate:authorDate,
+              status:status,priority:col(row,"Priority")||"Medium",module:module,
+              application:col(row,"Application"),devObject:col(row,"Development Object"),
+              refRicefwId:col(row,"Reference RICEFW ID"),
+              changeTypes:changeTypes,
+              businessContext:col(row,"Business Context"),
+              requirements:requirements,
+              businessLogic:col(row,"Business Logic"),
+              dataSources:col(row,"Data Sources"),
+              notes:col(row,"Notes"),
+              preparedBy:col(row,"Prepared By"),
+              reviewedBy:col(row,"Reviewed By"),
+              approvedBy:col(row,"Approved By"),
+              // defaults for non-Excel fields
+              sapObjects:[{type:"Program",name:"",description:"",action:"Create"}],
+              configDetails:"",selectionScreen:[{field:"",label:"",dataElement:"",selType:"Parameter",mandatory:"Yes"}],
+              businessLogicTable:[{condition:"",logic:"",source:"",target:""}],logicMode:"text",
+              outputType:"",formName:"",layoutChanges:"",
+              testCases:[{input:"",expected:"",status:""}],
+              attachments:[],techSpecAttachments:[],signDate:""
+            };
+          });
+
+          var msg="Found "+previews.length+" row(s) to import:\n\n";
+          previews.slice(0,10).forEach(function(p,i){
+            msg+=(i+1)+". "+p.crId+" — "+p.title+" ("+p.status+")\n";
+          });
+          if(previews.length>10)msg+="... and "+(previews.length-10)+" more.\n";
+          msg+="\nImport all to Firebase?";
+
+          if(!window.confirm(msg))return;
+
+          if(!FB_CONFIGURED){
+            alert("Firebase is not configured. Please set up Firebase first to use bulk import.");
+            return;
+          }
+
+          var batch=db.batch();
+          previews.forEach(function(p){
+            var ref=db.collection(FS_COLLECTION).doc();
+            var meta={crId:p.crId,jiraId:p.jiraId,title:p.title,author:p.author,module:p.module,
+              status:p.status,priority:p.priority,changeTypes:p.changeTypes,
+              devObject:p.devObject,application:p.application,refRicefwId:p.refRicefwId,
+              updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+              createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+            batch.set(ref,Object.assign({},meta,{data:p}));
+          });
+          batch.commit().then(function(){
+            alert("Successfully imported "+previews.length+" functional spec(s) to Firebase!");
+          }).catch(function(err){
+            alert("Import failed: "+err.message);
+          });
+        }catch(err){
+          alert("Error reading Excel file: "+err.message+"\nMake sure it's a valid .xlsx file.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    };
+    input.click();
+  }
+
   function goToDashboard(){setScreen("dashboard");setPg(0);}
   function has(sid){var r0=d.requirements[0];var r0t=r0?(typeof r0==="string"?r0:(r0.text||"")):"";var c={overview:[d.crId,d.title],business:[d.businessContext],objects:[d.sapObjects[0]&&d.sapObjects[0].name],requirements:[r0t],techspec:[d.businessLogic||(d.businessLogicTable[0]&&d.businessLogicTable[0].condition)],test:[d.testCases[0]&&d.testCases[0].input],notes:[d.notes,d.preparedBy,d.attachments.length?"y":""]};var arr=c[sid]||[];return arr.some(function(v){return v&&v.toString().trim();});}
 
@@ -23145,11 +23170,13 @@ function App(){
       h(Fld,{label:"Date",value:d.signDate,onChange:function(v){set("signDate",v);},type:"date"})
     )
   );}
+  if(!authed) return h(PasswordGate,{onSuccess:function(){setAuthed(true);}});
 
   if(screen==="dashboard"){
     return h(Dashboard,{
       onNew:function(){setD(init());setFsDocId(null);setSavedAt(null);setSaveErr(null);setScreen("editor");},
-      onOpen:function(doc){setD(Object.assign({},init(),doc.data||{}));setFsDocId(doc.id);setSavedAt(null);setSaveErr(null);setScreen("editor");}
+      onOpen:function(doc){setD(Object.assign({},init(),doc.data||{}));setFsDocId(doc.id);setSavedAt(null);setSaveErr(null);setScreen("editor");},
+      onImport:importFromExcel
     });
   }
 
