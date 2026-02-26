@@ -22028,6 +22028,102 @@ var DEFAULT_DEV_OBJECTS = [
   "Billing output"
 ];
 
+var DEFAULT_APPLICATIONS = [
+  "Net Order",
+  "EHealth",
+  "Kentico",
+  "MSD",
+  "Salesfoce",
+  "DPN",
+  "e-pakbon",
+  "Evidensia",
+  "Hills",
+  "MKG",
+  "Pyramid"
+];
+
+var DEFAULT_RICEFW_IDS = [
+  "Netorder - Material Master",
+  "NetOrder - Condition Records",
+  "NetOrder - Order Confirmation",
+  "NetOrder - BP/Customer Master",
+  "NetOrder - Delivery Confirmation",
+  "NetOrder - Material Determination",
+  "NetOrder - List of batches / expiry dates",
+  "Netorder - Listing & Exclusion",
+  "NetOrder - Classification",
+  "NetOrder - Sales Order Simulate",
+  "NetOrder - Inventory Information",
+  "NetOrder - Sales Order Creation",
+  "Ehealth - Order",
+  "Ehealth - Delivery",
+  "Kentico - Customer Master",
+  "Kentico - Material Master",
+  "Kentico - Price Conditions",
+  "Kentico - MSD Contract",
+  "Kentico - Stock Req (ATP Information)",
+  "Kentico - Lsiting & Exclusion",
+  "Kentico - Sales Order Creation",
+  "Kentico - Delivery",
+  "Kentico - Customer Address",
+  "MSD - INT-245",
+  "MSD - INT-254",
+  "MSD - INT-246",
+  "MSD - INT-162",
+  "SF - ZBPC_M_I003_Q1",
+  "SF - ZBPC_M_I004_Q1",
+  "SF - ZTAB_ART_VER",
+  "SF - ZTAB_CUST_VER",
+  "SF - ZTAB_VENDR_VER",
+  "SF - AUV_FACT_CLASS",
+  "SF - AUV_OPIUM-SF",
+  "SF - VER_KLCHT_DLIV",
+  "SF - VER_KLCHT_DLWM",
+  "SF - VER_KLCHT_ORD",
+  "DPN - DHL_Shipment",
+  "E-Pabkon - RTO_Shipment",
+  "E-Pabkon - IS_SAP_Pakbon_2_VetCIS",
+  "Evidensia - Invoices",
+  "Hills - EDI_Orders",
+  "MKG - RTO_Shipment",
+  "Pyramid - Invoice outbound",
+  "Sales Quotation/ Sales Order Approval Process",
+  "Back-Order Processing",
+  "DA-OTC-007",
+  "DA-OTC-008",
+  "DA-OTC-009",
+  "DA-OTC-002-A",
+  "DA-OTC-002-B",
+  "DA-OTC-006",
+  "DA-OTC-015-A",
+  "DA-OTC-015-B",
+  "DA-OTC-016-A",
+  "DA-OTC-016-B",
+  "DA-OTC-016-C",
+  "DA-OTC-017",
+  "DA-OTC-019",
+  "DA-OTC-020",
+  "DA-OTC-021",
+  "DA-BRF-OTC",
+  "DA-OTC-BE-x1",
+  "DA-OTC-BE-x2-A",
+  "DA-OTC-BE-x2-B",
+  "DA-OTC-BE-x3-A",
+  "DA-OTC-BE-x3-B",
+  "DA-OTC-BE-x3-C",
+  "DA-OTC-BE-x4-A",
+  "DA-OTC-BE-x4-B",
+  "DA-OTC-BE-x4-C",
+  "DA-OTC-BE-x5-A",
+  "DA-OTC-BE-x5-B",
+  "DA-OTC-BE-x5-C",
+  "DA-OTC-NL-04",
+  "DA-OTC-BE-x3",
+  "DA-OTC-NL-03",
+  "DA-OTC-NL-05",
+  "DA-OTC-NL-07"
+];
+
 var db = null;
 var FS_COLLECTION = "fs-documents";
 if(FB_CONFIGURED){
@@ -22108,9 +22204,10 @@ function Dashboard(props){
   }
 
   var filtered=fsList.filter(function(f){
-    if(filter.module&&f.module!==filter.module)return false;
     if(filter.status&&f.status!==filter.status)return false;
+    if(filter.app&&f.application!==filter.app)return false;
     if(filter.devObj&&f.devObject!==filter.devObj)return false;
+    if(filter.ricefw&&f.refRicefwId!==filter.ricefw)return false;
     if(filter.search){
       var q=filter.search.toLowerCase();
       if(!(f.title||"").toLowerCase().includes(q)&&!(f.crId||"").toLowerCase().includes(q)&&!(f.author||"").toLowerCase().includes(q))return false;
@@ -22138,9 +22235,18 @@ function Dashboard(props){
       h("div",{className:"dash-filters"},
         h("input",{type:"text",placeholder:"\uD83D\uDD0D Search by title, CR ID or author...",value:filter.search,
           onChange:function(e){setFilter(Object.assign({},filter,{search:e.target.value}));}}),
-        h("select",{value:filter.module,onChange:function(e){setFilter(Object.assign({},filter,{module:e.target.value}));}},
-          h("option",{value:""},"All Modules"),
-          modules.map(function(m){return h("option",{key:m,value:m},m);})),
+        h("select",{value:filter.app||"",onChange:function(e){setFilter(Object.assign({},filter,{app:e.target.value}));}},
+          h("option",{value:""},"All Applications"),
+          DEFAULT_APPLICATIONS.map(function(o){return h("option",{key:o,value:o},o);})
+        ),
+        h("select",{value:filter.devObj||"",onChange:function(e){setFilter(Object.assign({},filter,{devObj:e.target.value}));}},
+          h("option",{value:""},"All Dev. Objects"),
+          DEFAULT_DEV_OBJECTS.map(function(o){return h("option",{key:o,value:o},o);})
+        ),
+        h("select",{value:filter.ricefw||"",onChange:function(e){setFilter(Object.assign({},filter,{ricefw:e.target.value}));}},
+          h("option",{value:""},"All RICEFW IDs"),
+          DEFAULT_RICEFW_IDS.map(function(o){return h("option",{key:o,value:o},o);})
+        ),
         h("select",{value:filter.devObj||"",onChange:function(e){setFilter(Object.assign({},filter,{devObj:e.target.value}));}},
           h("option",{value:""},"All Dev. Objects"),
           DEFAULT_DEV_OBJECTS.map(function(o){return h("option",{key:o,value:o},o);})
@@ -22157,15 +22263,15 @@ function Dashboard(props){
       ):
       h("table",{className:"dash-table"},
         h("thead",null,h("tr",null,
-          h("th",null,"CR / JIRA ID"),h("th",null,"Title"),h("th",null,"Dev. Object"),h("th",null,"Module"),
+          h("th",null,"CR / JIRA ID"),h("th",null,"Title"),h("th",null,"Application"),h("th",null,"Dev. Object"),
           h("th",null,"Status"),h("th",null,"Author"),h("th",null,"Last Updated"),h("th",null,"")
         )),
         h("tbody",null,filtered.map(function(f){
           return h("tr",{key:f.id,onClick:function(){onOpen(f);}},
             h("td",null,h("div",{className:"cr"},f.crId||"\u2014"),h("div",{className:"auth"},f.jiraId||"")),
             h("td",null,h("div",{className:"ttl"},f.title||"Untitled")),
+            h("td",null,h("div",{style:{fontSize:"11px",color:"#555"}},f.application||"\u2014")),
             h("td",null,h("div",{style:{fontSize:"11px",color:"#555"}},f.devObject||"\u2014")),
-            h("td",null,h("span",{className:"mod-badge"},f.module||"?")),
             h("td",null,statusBadge(f.status)),
             h("td",null,h("div",{className:"auth"},f.author||"\u2014")),
             h("td",null,h("div",{className:"ts"},fmtDate(f.updatedAt))),
@@ -22182,7 +22288,7 @@ var h=React.createElement,useState=React.useState,useRef=React.useRef,useEffect=
 var CTYPES=[{id:"new_program",label:"New Program"},{id:"modify_program",label:"Modify Program"},{id:"form_output",label:"Form / Output"},{id:"enhancement",label:"Enhancement"},{id:"interface_api",label:"Interface / API"},{id:"config",label:"Configuration"}];
 var SECS=[{id:"overview",label:"Overview",num:"1"},{id:"business",label:"Business Context",num:"2"},{id:"requirements",label:"Requirements",num:"3"},{id:"objects",label:"SAP Objects",num:"4"},{id:"techspec",label:"Technical Specification",num:"5"},{id:"test",label:"Test Scenario",num:"6"},{id:"notes",label:"Notes & Sign-off",num:"7"}];
 
-function init(){return{crId:"",jiraId:"S4HDR-XXXX",devObject:"",priority:"Medium",module:"SD",status:"Draft",title:"",author:"",authorDate:new Date().toISOString().split("T")[0],changeTypes:["new_program"],businessContext:"",sapObjects:[{type:"Program",name:"",description:"",action:"Create"}],requirements:[{text:"",attachments:[]}],configDetails:"",selectionScreen:[{field:"",label:"",dataElement:"",selType:"Parameter",mandatory:"Yes"}],businessLogic:"",businessLogicTable:[{condition:"",logic:"",source:"",target:""}],logicMode:"text",outputType:"",formName:"",layoutChanges:"",dataSources:"",testCases:[{input:"",expected:"",status:""}],notes:"",attachments:[],techSpecAttachments:[],preparedBy:"",reviewedBy:"",approvedBy:"",signDate:""}}
+function init(){return{crId:"",jiraId:"S4HDR-XXXX",devObject:"",application:"",refRicefwId:"",priority:"Medium",module:"SD",status:"Draft",title:"",author:"",authorDate:new Date().toISOString().split("T")[0],changeTypes:["new_program"],businessContext:"",sapObjects:[{type:"Program",name:"",description:"",action:"Create"}],requirements:[{text:"",attachments:[]}],configDetails:"",selectionScreen:[{field:"",label:"",dataElement:"",selType:"Parameter",mandatory:"Yes"}],businessLogic:"",businessLogicTable:[{condition:"",logic:"",source:"",target:""}],logicMode:"text",outputType:"",formName:"",layoutChanges:"",dataSources:"",testCases:[{input:"",expected:"",status:""}],notes:"",attachments:[],techSpecAttachments:[],preparedBy:"",reviewedBy:"",approvedBy:"",signDate:""}}
 
 function showSel(cts){return (cts||[]).some(function(c){return c==="new_program"||c==="modify_program";});}
 function showForm(cts){return (cts||[]).some(function(c){return c==="form_output";});}
@@ -22340,6 +22446,7 @@ async function exportWord(d){
     rows:[
       new TableRow({children:[labelCell("CR ID",LW),dataCell(d.crId,VW),labelCell("JIRA ID",LW),dataCell(d.jiraId,VW)]}),
       new TableRow({children:[labelCell("Dev. Object",LW),new TableCell({width:{size:VW+LW+VW,type:WidthType.DXA},borders:borders,margins:CM,columnSpan:3,children:[new Paragraph({children:[new TextRun({text:d.devObject||"",size:18,font:"Calibri"})]})]})]}),
+      new TableRow({children:[labelCell("Application",LW),dataCell(d.application||"",VW),labelCell("Ref. RICEFW ID",LW),dataCell(d.refRicefwId||"",VW)]}),
       new TableRow({children:[labelCell("Module",LW),dataCell(d.module,VW),labelCell("Priority / Status",LW),dataCell((d.priority||"")+" / "+(d.status||""),VW)]}),
       new TableRow({children:[labelCell("Title",LW),new TableCell({width:{size:VW+LW+VW,type:WidthType.DXA},borders:borders,margins:CM,columnSpan:3,children:[new Paragraph({children:[new TextRun({text:d.title||"",size:18,font:"Calibri"})]})]})]}) ,
       new TableRow({children:[labelCell("Author",LW),new TableCell({width:{size:VW+LW+VW,type:WidthType.DXA},borders:borders,margins:CM,columnSpan:3,children:[new Paragraph({children:[new TextRun({text:(d.author||"")+(d.authorDate?" — "+d.authorDate:""),size:18,font:"Calibri"})]})]})]})
@@ -22656,6 +22763,39 @@ function App(){
     await db.collection("config").doc("dev-objects").set({items:items});
     setEditingDO(false);
   }
+  // Application dropdown — loaded from Firebase config/applications
+  var _app=React.useState(DEFAULT_APPLICATIONS),applications=_app[0],setApplications=_app[1];
+  var _appedit=React.useState(false),editingApp=_appedit[0],setEditingApp=_appedit[1];
+  var _appdraft=React.useState(""),appDraft=_appdraft[0],setAppDraft=_appdraft[1];
+
+  // Reference RICEFW ID dropdown — loaded from Firebase config/ricefw-ids
+  var _rf=React.useState(DEFAULT_RICEFW_IDS),ricefwIds=_rf[0],setRicefwIds=_rf[1];
+  var _rfedit=React.useState(false),editingRF=_rfedit[0],setEditingRF=_rfedit[1];
+  var _rfdraft=React.useState(""),rfDraft=_rfdraft[0],setRfDraft=_rfdraft[1];
+
+  useEffect(function(){
+    if(!FB_CONFIGURED)return;
+    db.collection("config").doc("applications").onSnapshot(function(snap){
+      if(snap.exists&&snap.data().items&&snap.data().items.length) setApplications(snap.data().items);
+    });
+    db.collection("config").doc("ricefw-ids").onSnapshot(function(snap){
+      if(snap.exists&&snap.data().items&&snap.data().items.length) setRicefwIds(snap.data().items);
+    });
+  },[]);
+
+  async function saveAppList(){
+    if(!FB_CONFIGURED){alert("Firebase not configured.");return;}
+    var items=appDraft.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+    await db.collection("config").doc("applications").set({items:items});
+    setEditingApp(false);
+  }
+  async function saveRFList(){
+    if(!FB_CONFIGURED){alert("Firebase not configured.");return;}
+    var items=rfDraft.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+    await db.collection("config").doc("ricefw-ids").set({items:items});
+    setEditingRF(false);
+  }
+
 
 
   useEffect(function(){
@@ -22722,7 +22862,7 @@ function App(){
     try{
       var compressed = await compressAllImages(d);
       var meta = {crId:d.crId,jiraId:d.jiraId,title:d.title,author:d.author,module:d.module,
-        status:d.status,priority:d.priority,changeTypes:d.changeTypes,devObject:d.devObject||"",
+        status:d.status,priority:d.priority,changeTypes:d.changeTypes,devObject:d.devObject||"",application:d.application||"",refRicefwId:d.refRicefwId||"",
         updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
       var payload = Object.assign({},meta,{data:compressed});
       if(fsDocId){
@@ -22751,6 +22891,19 @@ function App(){
     FR(h(Sel,{label:"Status",value:d.status,onChange:function(v){set("status",v);},opts:["Draft","In Review","Approved","Final"],half:true}),h("div",{className:"fld half"})),
     h(Fld,{label:"Title",value:d.title,onChange:function(v){set("title",v);},ph:"Short descriptive title of the change request",req:true}),
     FR(h(Fld,{label:"Author",value:d.author,onChange:function(v){set("author",v);},half:true}),h(Fld,{label:"Date",value:d.authorDate,onChange:function(v){set("authorDate",v);},type:"date",half:true})),
+    h("div",{className:"stitle"},"Change Type"),
+    h("p",{className:"help"},"Select one or more \u2014 controls which technical sections appear in step 5."),
+    h("div",{className:"pills"},CTYPES.map(function(c){
+      var on=(d.changeTypes||[]).indexOf(c.id)>=0;
+      return h("button",{key:c.id,className:"pill"+(on?" on":""),onClick:function(){
+        setD(function(o){
+          var a=(o.changeTypes||[]).slice();
+          var idx=a.indexOf(c.id);
+          if(idx>=0){if(a.length>1)a.splice(idx,1);}else{a.push(c.id);}
+          return Object.assign({},o,{changeTypes:a});
+        });
+      }},c.label);
+    })),
     h("div",{className:"stitle"},"Development Object"),
     editingDO?h("div",{style:{marginBottom:"14px"}},
       h("p",{className:"help"},"One item per line. Changes are saved to Firebase and shared with the whole team instantly."),
@@ -22766,19 +22919,36 @@ function App(){
       ),
       FB_CONFIGURED?h("button",{title:"Edit the Development Objects list",style:{padding:"6px 10px",border:"1px solid #dde",borderRadius:"6px",background:"#fff",cursor:"pointer",fontSize:"13px",color:"#888"},onClick:function(){setDoDraft(devObjects.join("\n"));setEditingDO(true);}},"\u2699\uFE0F"):null
     ),
-    h("div",{className:"stitle"},"Change Type"),
-    h("p",{className:"help"},"Select one or more \u2014 controls which technical sections appear in step 5."),
-    h("div",{className:"pills"},CTYPES.map(function(c){
-      var on=(d.changeTypes||[]).indexOf(c.id)>=0;
-      return h("button",{key:c.id,className:"pill"+(on?" on":""),onClick:function(){
-        setD(function(o){
-          var a=(o.changeTypes||[]).slice();
-          var idx=a.indexOf(c.id);
-          if(idx>=0){if(a.length>1)a.splice(idx,1);}else{a.push(c.id);}
-          return Object.assign({},o,{changeTypes:a});
-        });
-      }},c.label);
-    }))
+    h("div",{className:"stitle"},"Application"),
+    editingApp?h("div",{style:{marginBottom:"14px"}},
+      h("p",{className:"help"},"One item per line. Saved to Firebase and shared with the whole team."),
+      h("textarea",{rows:8,value:appDraft,onChange:function(e){setAppDraft(e.target.value);},style:{width:"100%",padding:"8px 12px",border:"1px solid #4f7cff",borderRadius:"6px",fontSize:"12px",fontFamily:"Courier New, monospace",resize:"vertical",outline:"none",lineHeight:"1.6"}}),
+      h("div",{style:{display:"flex",gap:"8px",marginTop:"8px"}},
+        h("button",{className:"btn-pub",style:{flex:1,padding:"8px"},onClick:saveAppList},"Save list to Firebase"),
+        h("button",{className:"nav-btn sec",style:{padding:"8px 16px"},onClick:function(){setEditingApp(false);}},"Cancel")
+      )
+    ):h("div",{style:{display:"flex",gap:"8px",alignItems:"center",marginBottom:"14px"}},
+      h("select",{value:d.application||"",onChange:function(e){set("application",e.target.value);},style:{flex:1,padding:"8px 12px",border:"1px solid #dde",borderRadius:"6px",fontSize:"13px",fontFamily:"inherit",outline:"none",background:"#fff"}},
+        h("option",{value:""},"-- Select Application --"),
+        applications.map(function(o){return h("option",{key:o,value:o},o);})
+      ),
+      FB_CONFIGURED?h("button",{title:"Edit Application list",style:{padding:"6px 10px",border:"1px solid #dde",borderRadius:"6px",background:"#fff",cursor:"pointer",fontSize:"13px",color:"#888"},onClick:function(){setAppDraft(applications.join("\n"));setEditingApp(true);}},"\u2699\uFE0F"):null
+    ),
+    h("div",{className:"stitle"},"Reference RICEFW ID"),
+    editingRF?h("div",{style:{marginBottom:"14px"}},
+      h("p",{className:"help"},"One item per line. Saved to Firebase and shared with the whole team."),
+      h("textarea",{rows:10,value:rfDraft,onChange:function(e){setRfDraft(e.target.value);},style:{width:"100%",padding:"8px 12px",border:"1px solid #4f7cff",borderRadius:"6px",fontSize:"12px",fontFamily:"Courier New, monospace",resize:"vertical",outline:"none",lineHeight:"1.6"}}),
+      h("div",{style:{display:"flex",gap:"8px",marginTop:"8px"}},
+        h("button",{className:"btn-pub",style:{flex:1,padding:"8px"},onClick:saveRFList},"Save list to Firebase"),
+        h("button",{className:"nav-btn sec",style:{padding:"8px 16px"},onClick:function(){setEditingRF(false);}},"Cancel")
+      )
+    ):h("div",{style:{display:"flex",gap:"8px",alignItems:"center",marginBottom:"14px"}},
+      h("select",{value:d.refRicefwId||"",onChange:function(e){set("refRicefwId",e.target.value);},style:{flex:1,padding:"8px 12px",border:"1px solid #dde",borderRadius:"6px",fontSize:"13px",fontFamily:"inherit",outline:"none",background:"#fff"}},
+        h("option",{value:""},"-- Select Reference RICEFW ID --"),
+        ricefwIds.map(function(o){return h("option",{key:o,value:o},o);})
+      ),
+      FB_CONFIGURED?h("button",{title:"Edit RICEFW ID list",style:{padding:"6px 10px",border:"1px solid #dde",borderRadius:"6px",background:"#fff",cursor:"pointer",fontSize:"13px",color:"#888"},onClick:function(){setRfDraft(ricefwIds.join("\n"));setEditingRF(true);}},"\u2699\uFE0F"):null
+    ),
   );}
 
   if(pg===1){content.push(
