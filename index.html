@@ -22241,6 +22241,7 @@ function Dashboard(props){
       ),
       h("div",{style:{display:"flex",gap:"10px",alignItems:"center"}},
         h("button",{className:"btn-new",style:{background:"#22c55e"},onClick:props.onImport},"\u2b06 Import Excel"),
+        h("button",{className:"btn-new",style:{background:"#0ea5e9"},onClick:function(){props.onExport(filtered);}},"\u2b07 Export Excel"),
         h("button",{className:"btn-new",onClick:onNew},"+ New FS")
       )
     ),
@@ -22960,6 +22961,75 @@ function App(){
     setSaving(false);
   }
 
+  function exportToExcel(rows){
+    if(!rows||rows.length===0){alert("No documents to export. Adjust your filters and try again.");return;}
+    if(typeof XLSX==="undefined"){alert("SheetJS not loaded.");return;}
+
+    var HEADERS=["CR ID","JIRA ID","Title","Author","Date","Status","Priority","Module",
+      "Application","Development Object","Reference RICEFW ID","Change Types",
+      "Business Context","Requirements","Business Logic","Data Sources","Notes",
+      "Prepared By","Reviewed By","Approved By"];
+
+    var HINTS=["e.g. CR-1234","e.g. S4HDR-5678","Short description","Your name",
+      "YYYY-MM-DD","Draft / In Review / Approved / Final","High / Medium / Low",
+      "SD / MM / FI ...","Net Order / EHealth ...","Sales Order / Pricing ...",
+      "DA-OTC-007 ...","new_program, modify_program (comma-separated)",
+      "Why this change is needed","Req 1 || Req 2 (use || to separate)",
+      "Free text or table rows","Key SAP tables/fields","Additional notes",
+      "Name","Name","Name"];
+
+    var dataRows=rows.map(function(f){
+      var d=f.data||f;
+      var reqs=(d.requirements||[]).map(function(r){
+        return typeof r==="string"?r:(r&&r.text?r.text:"");
+      }).filter(Boolean).join(" || ");
+      var cts=(d.changeTypes||[]).join(", ");
+      var dateVal=d.authorDate||d.signDate||"";
+      return [
+        f.crId||d.crId||"",
+        f.jiraId||d.jiraId||"",
+        f.title||d.title||"",
+        f.author||d.author||"",
+        dateVal,
+        f.status||d.status||"",
+        d.priority||"",
+        d.module||"",
+        f.application||d.application||"",
+        f.devObject||d.devObject||"",
+        f.refRicefwId||d.refRicefwId||"",
+        cts,
+        d.businessContext||"",
+        reqs,
+        d.businessLogic||"",
+        d.dataSources||"",
+        d.notes||"",
+        d.preparedBy||"",
+        d.reviewedBy||"",
+        d.approvedBy||""
+      ];
+    });
+
+    var wsData=[HEADERS,HINTS].concat(dataRows);
+    var ws=XLSX.utils.aoa_to_sheet(wsData);
+
+    // Column widths
+    var wscols=[
+      {wch:14},{wch:16},{wch:36},{wch:16},{wch:12},{wch:12},{wch:10},{wch:8},
+      {wch:16},{wch:20},{wch:22},{wch:28},{wch:40},{wch:50},{wch:40},{wch:30},
+      {wch:30},{wch:16},{wch:16},{wch:16}
+    ];
+    ws["!cols"]=wscols;
+
+    // Style header row bold yellow (SheetJS CE supports limited styles via !rows)
+    ws["!rows"]=[{hpt:18},{hpt:14}];
+
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"FS Documents");
+    var ts=new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb,"SAP_FS_Export_"+ts+".xlsx");
+  }
+
+
   function importFromExcel(){
     var input=document.createElement("input");
     input.type="file";
@@ -23334,6 +23404,7 @@ function App(){
 
   if(screen==="dashboard"){
     return h(Dashboard,{
+      onExport:exportToExcel,
       onNew:function(){setD(init());setFsDocId(null);setSavedAt(null);setSaveErr(null);setScreen("editor");},
       onOpen:function(doc){setD(Object.assign({},init(),doc.data||{}));setFsDocId(doc.id);setSavedAt(null);setSaveErr(null);setScreen("editor");},
       onImport:importFromExcel
