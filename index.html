@@ -22366,9 +22366,9 @@ function PasswordGate(props){
 
 var h=React.createElement,useState=React.useState,useRef=React.useRef,useEffect=React.useEffect;
 var CTYPES=[{id:"new_program",label:"New Program"},{id:"modify_program",label:"Modify Program"},{id:"form_output",label:"Form / Output"},{id:"enhancement",label:"Enhancement"},{id:"interface_api",label:"Interface / API"},{id:"config",label:"Configuration"}];
-var SECS=[{id:"overview",label:"Overview",num:"1"},{id:"business",label:"Business Context",num:"2"},{id:"requirements",label:"Requirements",num:"3"},{id:"objects",label:"SAP Objects",num:"4"},{id:"techspec",label:"Technical Specification",num:"5"},{id:"test",label:"Test Scenario",num:"6"},{id:"notes",label:"Notes & Sign-off",num:"7"}];
+var SECS=[{id:"overview",label:"Overview",num:"1"},{id:"business",label:"Business Context",num:"2"},{id:"requirements",label:"Requirements",num:"3"},{id:"objects",label:"SAP Objects",num:"4"},{id:"techspec",label:"Technical Specification",num:"5"},{id:"test",label:"Test Scenario",num:"6"},{id:"notes",label:"Notes & Sign-off",num:"7"},{id:"techsolution",label:"Technical Solution",num:"8"}];
 
-function init(){return{crId:"",jiraId:"S4HDR-XXXX",devObject:"",application:"",refRicefwId:"",priority:"Medium",module:"SD",status:"Draft",title:"",author:"",authorDate:new Date().toISOString().split("T")[0],changeTypes:["new_program"],businessContext:"",sapObjects:[{type:"Program",name:"",description:"",action:"Create"}],requirements:[{text:"",attachments:[]}],configDetails:"",selectionScreen:[{field:"",label:"",dataElement:"",selType:"Parameter",mandatory:"Yes"}],businessLogic:"",businessLogicTable:[{condition:"",logic:"",source:"",target:""}],logicMode:"text",outputType:"",formName:"",layoutChanges:"",dataSources:"",testCases:[{input:"",expected:"",status:""}],notes:"",attachments:[],techSpecAttachments:[],preparedBy:"",reviewedBy:"",approvedBy:"",signDate:""}}
+function init(){return{crId:"",jiraId:"S4HDR-XXXX",devObject:"",application:"",refRicefwId:"",priority:"Medium",module:"SD",status:"Draft",title:"",author:"",authorDate:new Date().toISOString().split("T")[0],changeTypes:["new_program"],businessContext:"",sapObjects:[{type:"Program",name:"",description:"",action:"Create"}],requirements:[{text:"",attachments:[]}],configDetails:"",selectionScreen:[{field:"",label:"",dataElement:"",selType:"Parameter",mandatory:"Yes"}],businessLogic:"",businessLogicTable:[{condition:"",logic:"",source:"",target:""}],logicMode:"text",outputType:"",formName:"",layoutChanges:"",dataSources:"",testCases:[{input:"",expected:"",status:""}],notes:"",attachments:[],techSpecAttachments:[],preparedBy:"",reviewedBy:"",approvedBy:"",signDate:"",trNumbers:"",packageNumber:"",devObjectsCreated:""}}
 
 function showSel(cts){return (cts||[]).some(function(c){return c==="new_program"||c==="modify_program";});}
 function showForm(cts){return (cts||[]).some(function(c){return c==="form_output";});}
@@ -22781,6 +22781,21 @@ async function exportWord(d){
     }]
   });
 
+
+  // -- 8. TECHNICAL SOLUTION
+  var hasTR=d.trNumbers&&d.trNumbers.trim();
+  var hasPkg=d.packageNumber&&d.packageNumber.trim();
+  var hasDevObjs=d.devObjectsCreated&&d.devObjectsCreated.trim();
+  if(hasTR||hasPkg||hasDevObjs){
+    children.push(secHeading("8","TECHNICAL SOLUTION"));
+    children.push(spacer());
+    var tsLW=Math.round(CW*0.25),tsVW=CW-tsLW;
+    var tsRows=[];
+    if(hasTR) tsRows.push(new TableRow({children:[labelCell("Transport Request(s)",tsLW),dataCell(d.trNumbers,tsVW)]}));
+    if(hasPkg) tsRows.push(new TableRow({children:[labelCell("Package Number",tsLW),dataCell(d.packageNumber,tsVW)]}));
+    if(tsRows.length){children.push(new Table({width:{size:CW,type:WidthType.DXA},columnWidths:[tsLW,tsVW],rows:tsRows}));children.push(spacer());}
+    if(hasDevObjs){children.push(subHeading("Development Objects"));children.push(bodyText(d.devObjectsCreated));children.push(spacer());}
+  }
   var fname=(d.crId||"FS_XXX")+"_FS.docx";
   Packer.toBlob(doc).then(function(blob){
     var url=URL.createObjectURL(blob);
@@ -22944,7 +22959,7 @@ function App(){
       var compressed = await compressAllImages(d);
       var meta = {crId:d.crId,jiraId:d.jiraId,title:d.title,author:d.author,module:d.module,
         status:d.status,priority:d.priority,changeTypes:d.changeTypes,devObject:d.devObject||"",application:d.application||"",refRicefwId:d.refRicefwId||"",
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+        trNumbers:d.trNumbers||"",packageNumber:d.packageNumber||"",devObjectsCreated:d.devObjectsCreated||"",updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
       var payload = Object.assign({},meta,{data:compressed});
       if(fsDocId){
         await db.collection(FS_COLLECTION).doc(fsDocId).set(payload);
@@ -22968,7 +22983,8 @@ function App(){
     var HEADERS=["CR ID","JIRA ID","Title","Author","Date","Status","Priority","Module",
       "Application","Development Object","Reference RICEFW ID","Change Types",
       "Business Context","Requirements","Business Logic","Data Sources","Notes",
-      "Prepared By","Reviewed By","Approved By"];
+      "Prepared By","Reviewed By","Approved By",
+      "Transport Request Number(s)","Package Number","Modified / Created Development Objects"];
 
     var HINTS=["e.g. CR-1234","e.g. S4HDR-5678","Short description","Your name",
       "YYYY-MM-DD","Draft / In Review / Approved / Final","High / Medium / Low",
@@ -22976,7 +22992,8 @@ function App(){
       "DA-OTC-007 ...","new_program, modify_program (comma-separated)",
       "Why this change is needed","Req 1 || Req 2 (use || to separate)",
       "Free text or table rows","Key SAP tables/fields","Additional notes",
-      "Name","Name","Name"];
+      "Name","Name","Name",
+      "e.g. DEVK123456, DEVK123457","e.g. ZOTC_DEV","One per line: ZPROGRAM (Program) - Created"];
 
     var dataRows=rows.map(function(f){
       var d=f.data||f;
@@ -23005,7 +23022,10 @@ function App(){
         d.notes||"",
         d.preparedBy||"",
         d.reviewedBy||"",
-        d.approvedBy||""
+        d.approvedBy||"",
+        d.trNumbers||"",
+        d.packageNumber||"",
+        d.devObjectsCreated||""
       ];
     });
 
@@ -23016,7 +23036,8 @@ function App(){
     var wscols=[
       {wch:14},{wch:16},{wch:36},{wch:16},{wch:12},{wch:12},{wch:10},{wch:8},
       {wch:16},{wch:20},{wch:22},{wch:28},{wch:40},{wch:50},{wch:40},{wch:30},
-      {wch:30},{wch:16},{wch:16},{wch:16}
+      {wch:30},{wch:16},{wch:16},{wch:16},
+      {wch:32},{wch:22},{wch:50}
     ];
     ws["!cols"]=wscols;
 
@@ -23086,6 +23107,9 @@ function App(){
               preparedBy:col(row,"Prepared By"),
               reviewedBy:col(row,"Reviewed By"),
               approvedBy:col(row,"Approved By"),
+              trNumbers:col(row,"Transport Request Number(s)"),
+              packageNumber:col(row,"Package Number"),
+              devObjectsCreated:col(row,"Modified / Created Development Objects"),
               // defaults for non-Excel fields
               sapObjects:[{type:"Program",name:"",description:"",action:"Create"}],
               configDetails:"",selectionScreen:[{field:"",label:"",dataElement:"",selType:"Parameter",mandatory:"Yes"}],
@@ -23135,7 +23159,7 @@ function App(){
   }
 
   function goToDashboard(){setScreen("dashboard");setPg(0);}
-  function has(sid){var r0=d.requirements[0];var r0t=r0?(typeof r0==="string"?r0:(r0.text||"")):"";var c={overview:[d.crId,d.title],business:[d.businessContext],objects:[d.sapObjects[0]&&d.sapObjects[0].name],requirements:[r0t],techspec:[d.businessLogic||(d.businessLogicTable[0]&&d.businessLogicTable[0].condition)],test:[d.testCases[0]&&d.testCases[0].input],notes:[d.notes,d.preparedBy,d.attachments.length?"y":""]};var arr=c[sid]||[];return arr.some(function(v){return v&&v.toString().trim();});}
+  function has(sid){var r0=d.requirements[0];var r0t=r0?(typeof r0==="string"?r0:(r0.text||"")):"";var c={overview:[d.crId,d.title],business:[d.businessContext],objects:[d.sapObjects[0]&&d.sapObjects[0].name],requirements:[r0t],techspec:[d.businessLogic||(d.businessLogicTable[0]&&d.businessLogicTable[0].condition)],test:[d.testCases[0]&&d.testCases[0].input],techsolution:[d.trNumbers,d.devObjectsCreated],notes:[d.notes,d.preparedBy,d.attachments.length?"y":""]};var arr=c[sid]||[];return arr.some(function(v){return v&&v.toString().trim();});}
 
   var sec=SECS[pg],content=[];
   function FR(){return h("div",{className:"frow"},Array.from(arguments));}
@@ -23399,6 +23423,20 @@ function App(){
       h(Fld,{label:"Approved By",value:d.approvedBy,onChange:function(v){set("approvedBy",v);}}),
       h(Fld,{label:"Date",value:d.signDate,onChange:function(v){set("signDate",v);},type:"date"})
     )
+  );}
+
+  if(pg===7){content.push(
+    h("div",{className:"cond-note",style:{background:"#f0fdf4",borderColor:"#86efac",color:"#166534",marginBottom:"18px"}},
+      "\uD83D\uDE80 Fill this section after the CR is transported to production."
+    ),
+    h(Fld,{label:"Transport Request Number(s)",value:d.trNumbers,onChange:function(v){set("trNumbers",v);},
+      ph:"e.g. DEVK123456, DEVK123457 (comma-separated)"}),
+    h(Fld,{label:"Package Number",value:d.packageNumber,onChange:function(v){set("packageNumber",v);},
+      ph:"e.g. ZOTC_DEV -- leave blank if existing package was used"}),
+    h(Fld,{label:"Modified / Created Development Objects",value:d.devObjectsCreated,
+      onChange:function(v){set("devObjectsCreated",v);},
+      type:"textarea",rows:8,
+      ph:"One per line, e.g.:\nZOTC_PRICE_REPORT (Program) - Created\nZSD_EXIT_01 (Enhancement) - Modified"})
   );}
   if(!authed) return h(PasswordGate,{onSuccess:function(){setAuthed(true);}});
 
